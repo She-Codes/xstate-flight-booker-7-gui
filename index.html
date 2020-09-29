@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Flight Booker</title>
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <link href="src/css/style.css" rel="stylesheet" />
+  </head>
+  <body class="h-screen flex justify-center items-center">
+    <div id="app">
+      <form
+        action=""
+        class="flex flex-col border border-solid border-black rounded-lg p-2"
+        data-state=""
+      >
+        <select class="border-black border-solid border rounded mb-2">
+          <option value="one way">one-way flight</option>
+          <option value="return">return flight</option>
+        </select>
+        <input
+          type="date"
+          class="border-black border-solid border rounded mb-2"
+        />
+        <input
+          type="date"
+          class="border-black border-solid border rounded mb-2"
+        />
+        <button
+          type="submit"
+          class="bg-blue-500 text-white rounded py-1"
+        >
+          Book Now
+        </button>
+      </form>
+    </div>
+    <script src="src/js/index.js"></script>
+  </body>
+</html>
