@@ -9,11 +9,7 @@ const startDateBeforeReturnDate = (startDate, returnDate) => {
 
 const doesDateValidCondPass = (c, event) => isDateValid(event.value);
 
-const doCurrentDatesPass = (context, e) => {
-  const { startDate, returnDate } = context;
-
-  const noStartDate = !startDate;
-  const noReturnDate = !returnDate;
+const doBothDatesPass = (startDate, returnDate) => {
   const startDateValid = isDateValid(startDate);
   const returnDateValid = isDateValid(returnDate);
   const datesInOrder = startDateBeforeReturnDate(
@@ -21,23 +17,17 @@ const doCurrentDatesPass = (context, e) => {
     returnDate
   );
 
-  if (noStartDate && noReturnDate) {
-    return true;
-  } else if (noStartDate && returnDateValid) {
-    return true;
-  } else if (startDateValid && noReturnDate) {
-    return true;
-  } else if (datesInOrder) {
-    return true;
-  } else {
-    return false;
-  }
+  return startDateValid && returnDateValid && datesInOrder;
+};
+
+const doCurrentDatesFail = (context, e) => {
+  const { startDate, returnDate } = context;
+
+  return !isDateValid(startDate) && !isDateValid(returnDate);
 };
 
 // used when switching to return flight
-const isCurrentStartInvalid = (context) => {
-  const { startDate, returnDate } = context;
-
+const isStartInvalid = (startDate, returnDate) => {
   return (
     !isDateValid(startDate) ||
     !startDateBeforeReturnDate(startDate, returnDate)
@@ -133,14 +123,26 @@ const formMachine = Machine({
               always: [
                 {
                   target: 'datesValid',
-                  cond: doCurrentDatesPass,
+                  cond: (context, e) => {
+                    const { startDate, returnDate } = context;
+                    return doBothDatesPass(startDate, returnDate);
+                  },
                 },
                 {
-                  target: 'startInvalid',
-                  cond: isCurrentStartInvalid,
+                  target: 'datesInvalid',
+                  cond: doCurrentDatesFail,
                 },
                 {
                   target: 'returnInvalid',
+                  cond: (context, e) =>
+                    !isDateValid(context.returnDate),
+                },
+                {
+                  target: 'startInvalid',
+                  cond: (context, e) => {
+                    const { startDate, returnDate } = context;
+                    return isStartInvalid(startDate, returnDate);
+                  },
                 },
               ],
             },
@@ -151,18 +153,30 @@ const formMachine = Machine({
             },
             startInvalid: {},
             returnInvalid: {},
+            datesInvalid: {},
           },
           on: {
             CHANGE_START_DATE: [
               {
                 target: '.datesValid',
-                cond: isStartDateValidForReturnFlight,
+                cond: (context, event) => {
+                  return doBothDatesPass(
+                    event.value,
+                    context.returnDate
+                  );
+                },
                 actions: assign({
                   startDate: (c, event) => event.value,
                 }),
               },
               {
                 target: '.startInvalid',
+                cond: (context, event) => {
+                  return isStartInvalid(
+                    event.value,
+                    context.returnDate
+                  );
+                },
                 actions: assign({
                   startDate: undefined,
                 }),
